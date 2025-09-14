@@ -23,7 +23,31 @@ export class AuthService {
         localStorage.removeItem(CONFIG.USER_KEY);
     }
 
+    // --- MÉTODOS ADICIONADOS ---
+    static parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error('Error parsing JWT:', error);
+            return null;
+        }
+    }
+
+    static isTokenExpired(token) {
+        const decoded = this.parseJwt(token);
+        if (!decoded || !decoded.exp) return true;
+        const currentTime = Math.floor(Date.now() / 1000);
+        return decoded.exp < currentTime;
+    }
+
+    // --- MÉTODO ATUALIZADO ---
     static isAuthenticated() {
-        return !!this.getToken();
+        const token = this.getToken();
+        return token && !this.isTokenExpired(token);
     }
 }

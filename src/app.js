@@ -17,10 +17,15 @@ class AppController {
         document.getElementById('logoutBtn')?.addEventListener('click', this.handleLogout.bind(this));
     }
 
+    // --- MÉTODO ATUALIZADO ---
     static checkAuthStatus() {
-        if (AuthService.isAuthenticated()) {
+        const token = AuthService.getToken();
+        const user = AuthService.getUser();
+        
+        if (token && user && !AuthService.isTokenExpired(token)) {
             this.showDashboard();
         } else {
+            AuthService.clearAuth();
             this.showAuth();
         }
     }
@@ -41,8 +46,10 @@ class AppController {
         this.showAuth();
     }
 
+    // --- MÉTODO ATUALIZADO ---
     static async handleLogin(e) {
         e.preventDefault();
+        
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
@@ -52,16 +59,38 @@ class AppController {
         try {
             const response = await ApiService.login({ email, password });
             
-            if (response.token && response.user) {
+            console.log('Login response:', response);
+            
+            if (response.token) {
+                // Store token and expiration
                 AuthService.setToken(response.token);
-                AuthService.setUser(response.user);
+                
+                // Parse JWT to extract user info
+                const userInfo = AuthService.parseJwt(response.token);
+                console.log('Parsed JWT:', userInfo);
+                
+                // Create user object from JWT claims and response
+                const user = {
+                    email: email,
+                    username: userInfo['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || email,
+                    role: response.roles && response.roles.length > 0 ? response.roles[0] : 
+                          userInfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'Client',
+                    roles: response.roles || [],
+                    expiration: response.expiration,
+                    jti: userInfo.jti
+                };
+                
+                console.log('User object:', user);
+                AuthService.setUser(user);
                 
                 UIUtils.showSuccess('Login realizado com sucesso!');
                 setTimeout(() => this.showDashboard(), 1000);
             } else {
-                throw new Error("Resposta da API inválida. Token ou usuário não encontrado.");
+                throw new Error("Token não encontrado na resposta da API.");
             }
+            
         } catch (error) {
+            console.error('Login error:', error);
             UIUtils.showError(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
         } finally {
             UIUtils.setLoading('loginBtn', 'loginLoading', 'loginText', false);
@@ -167,7 +196,6 @@ class AppController {
     }
 }
 
-// Inicia a aplicação quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
     AppController.init();
 });
