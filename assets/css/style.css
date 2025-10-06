@@ -458,3 +458,246 @@ body {
         padding: 25px 20px;
     }
 }
+/* Adicione estes estilos ao seu arquivo CSS */
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.features-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list li::before {
+    content: "✓";
+    color: #16a34a;
+    font-weight: bold;
+    margin-right: 12px;
+    background: #dcfce7;
+    padding: 4px 8px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+/* Animação para mensagens */
+.message {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.message.show {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.error-message {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #dc2626;
+    border-left: 4px solid #dc2626;
+}
+
+.success-message {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #16a34a;
+    border-left: 4px solid #16a34a;
+}
+
+/* Estilos para inputs */
+#specialtyInput:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #specialtiesContainer > div {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    #specialtiesContainer button {
+        margin-top: 8px;
+        width: 100%;
+    }
+}
+/* Adicione estes estilos ao seu arquivo CSS principal */
+
+/* Features List */
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.features-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list li::before {
+    content: "✓";
+    color: #16a34a;
+    font-weight: bold;
+    margin-right: 12px;
+    background: #dcfce7;
+    padding: 4px 8px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.features-list li:hover {
+    padding-left: 8px;
+    color: #1f2937;
+}
+
+/* Input Focus Styles */
+#specialityInput:focus {
+    outline: none;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Button Hover Effects */
+#saveSpecialityBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+#saveSpecialityBtn:active {
+    transform: translateY(0);
+}
+
+#saveSpecialityBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Role Badges */
+.role-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+}
+
+.role-serviceprovider {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+}
+
+.role-client {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+}
+
+/* Loading States */
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #specialityFormContainer > div {
+        flex-direction: column;
+    }
+    
+    #specialityInput {
+        min-width: 100% !important;
+    }
+    
+    #saveSpecialityBtn {
+        width: 100%;
+    }
+}
+
+/* Success/Error States */
+.success-state {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+
+.error-state {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.3s ease;
+}
+
+button {
+    transition: all 0.3s ease;
+}
+
+input {
+    transition: all 0.3s ease;
+}
