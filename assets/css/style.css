@@ -701,3 +701,402 @@ button {
 input {
     transition: all 0.3s ease;
 }
+/* Adicione estes estilos ao seu arquivo CSS principal */
+
+/* Features List */
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.features-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list li::before {
+    content: "✓";
+    color: #16a34a;
+    font-weight: bold;
+    margin-right: 12px;
+    background: #dcfce7;
+    padding: 4px 8px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.features-list li:hover {
+    padding-left: 8px;
+    color: #1f2937;
+}
+
+/* Input Focus Styles */
+#specialityInput:focus,
+#serviceName:focus,
+#serviceDescription:focus,
+#serviceDuration:focus,
+#servicePrice:focus {
+    outline: none;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Button Hover Effects */
+#saveSpecialityBtn:hover,
+#saveServiceBtn:hover,
+#newServiceBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+#saveSpecialityBtn:active,
+#saveServiceBtn:active,
+#newServiceBtn:active {
+    transform: translateY(0);
+}
+
+#saveSpecialityBtn:disabled,
+#saveServiceBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+#cancelServiceBtn:hover {
+    background: #d1d5db !important;
+}
+
+/* Modal Styles */
+#serviceModal {
+    animation: fadeIn 0.3s ease-out;
+}
+
+#serviceModal > div {
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Role Badges */
+.role-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+}
+
+.role-serviceprovider {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+}
+
+.role-client {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+}
+
+/* Loading States */
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #specialityFormContainer > div,
+    #serviceModal > div {
+        flex-direction: column;
+    }
+    
+    #specialityInput {
+        min-width: 100% !important;
+    }
+    
+    #saveSpecialityBtn,
+    #newServiceBtn {
+        width: 100%;
+    }
+
+    #serviceModal > div {
+        width: 95%;
+        padding: 24px;
+    }
+
+    #serviceModal > div > div:last-child {
+        flex-direction: column;
+    }
+
+    #serviceModal > div > div:last-child button {
+        width: 100%;
+    }
+}
+
+/* Success/Error States */
+.success-state {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+
+.error-state {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.3s ease;
+}
+
+button {
+    transition: all 0.3s ease;
+}
+
+input,
+textarea {
+    transition: all 0.3s ease;
+}
+
+/* Service Cards Hover */
+#servicesContainer > div:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Scrollbar Customization */
+#serviceModal > div::-webkit-scrollbar {
+    width: 8px;
+}
+
+#serviceModal > div::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+#serviceModal > div::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+#serviceModal > div::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+/* Adicione estes estilos ao seu arquivo CSS principal */
+
+/* Features List */
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.features-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list li::before {
+    content: "✓";
+    color: #16a34a;
+    font-weight: bold;
+    margin-right: 12px;
+    background: #dcfce7;
+    padding: 4px 8px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.features-list li:hover {
+    padding-left: 8px;
+    color: #1f2937;
+}
+
+/* Input Focus Styles */
+#specialityInput:focus {
+    outline: none;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Button Hover Effects */
+#saveSpecialityBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+#saveSpecialityBtn:active {
+    transform: translateY(0);
+}
+
+#saveSpecialityBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Adicione estes estilos ao seu arquivo CSS principal */
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Role Badges */
+.role-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+}
+
+.role-serviceprovider {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+}
+
+.role-client {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+}
+
+/* Loading States */
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #specialityFormContainer > div {
+        flex-direction: column;
+    }
+    
+    #specialityInput {
+        min-width: 100% !important;
+    }
+    
+    #saveSpecialityBtn {
+        width: 100%;
+    }
+}
+
+/* Success/Error States */
+.success-state {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+
+.error-state {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.3s ease;
+}
+
+button {
+    transition: all 0.3s ease;
+}
+
+input {
+    transition: all 0.3s ease;
+}

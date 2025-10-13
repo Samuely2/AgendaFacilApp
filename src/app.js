@@ -166,7 +166,8 @@ class AppController {
                 <h3 style="${baseTitleStyle}">Painel do Prestador</h3>
                 <p style="${baseParagraphStyle}">Acompanhe sua agenda, gerencie horários e serviços disponíveis.</p>
                 
-                <div style="background: linear-gradient(135deg, #f8fafc, #e0e7ff); padding: 24px; border-radius: 12px; margin-bottom: 30px; border: 2px solid #667eea;">
+                <!-- Seção de Especialidade -->
+                <div style="background: linear-gradient(135deg, #f8fafc, #e0e7ff); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #667eea;">
                     <h4 style="color: #1f2937; font-size: 20px; margin-bottom: 16px;">
                         ✨ Minha Especialidade
                     </h4>
@@ -194,6 +195,92 @@ class AppController {
                         </p>
                     </div>
                 </div>
+
+                <!-- Seção de Serviços -->
+                <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <h4 style="color: #1f2937; font-size: 20px; margin: 0;">
+                            🛠️ Meus Serviços
+                        </h4>
+                        <button 
+                            id="newServiceBtn"
+                            type="button"
+                            style="padding: 10px 20px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
+                        >
+                            ➕ Novo Serviço
+                        </button>
+                    </div>
+                    
+                    <div id="servicesContainer"></div>
+                </div>
+
+                <!-- Modal de Criar/Editar Serviço -->
+                <div id="serviceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                        <h3 style="color: #1f2937; font-size: 24px; margin-bottom: 24px;" id="modalTitle">Novo Serviço</h3>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Nome do Serviço *</label>
+                            <input 
+                                type="text" 
+                                id="serviceName"
+                                placeholder="Ex: Corte de cabelo"
+                                style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
+                            />
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Descrição *</label>
+                            <textarea 
+                                id="serviceDescription"
+                                placeholder="Descreva o serviço..."
+                                rows="3"
+                                style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical;"
+                            ></textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Duração (min) *</label>
+                                <input 
+                                    type="number" 
+                                    id="serviceDuration"
+                                    placeholder="30"
+                                    min="1"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
+                                />
+                            </div>
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Preço (R$) *</label>
+                                <input 
+                                    type="number" 
+                                    id="servicePrice"
+                                    placeholder="50.00"
+                                    min="0"
+                                    step="0.01"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
+                                />
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button 
+                                id="cancelServiceBtn"
+                                type="button"
+                                style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                id="saveServiceBtn"
+                                type="button"
+                                style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
+                            >
+                                💾 Salvar Serviço
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 
                 <ul class="features-list">
                     <li>Visualizar minha agenda diária/semanal</li>
@@ -201,11 +288,12 @@ class AppController {
                     <li>Gerenciar os serviços que ofereço</li>
                 </ul>`;
             
-            // CRITICAL: Aguarda o DOM atualizar
             setTimeout(() => {
-                console.log('🎬 Iniciando setup de especialidade...');
+                console.log('🎬 Iniciando setup de especialidade e serviços...');
                 this.setupSpecialityEvents();
                 this.loadSpecialityFromAPI();
+                this.setupServicesEvents();
+                this.loadServicesFromAPI();
             }, 100);
         }
         else if (role === 'Client') {
@@ -391,77 +479,358 @@ class AppController {
         }
     }
 
-    static async saveSpecialityToAPI() {
-        console.log('💾 saveSpecialityToAPI() INICIADO');
+    // ==========================================
+    // SERVIÇOS - MÉTODOS
+    // ==========================================
+
+    static currentEditingServiceId = null;
+
+    static setupServicesEvents() {
+        console.log('⚙️ setupServicesEvents()');
         
-        const input = document.getElementById('specialityInput');
-        const saveBtn = document.getElementById('saveSpecialityBtn');
+        const newServiceBtn = document.getElementById('newServiceBtn');
+        const cancelServiceBtn = document.getElementById('cancelServiceBtn');
+        const saveServiceBtn = document.getElementById('saveServiceBtn');
         
-        if (!input) {
-            console.error('❌ Input não encontrado');
+        if (newServiceBtn) {
+            newServiceBtn.onclick = () => {
+                console.log('🆕 Novo serviço clicado');
+                this.openServiceModal();
+            };
+        }
+        
+        if (cancelServiceBtn) {
+            cancelServiceBtn.onclick = () => {
+                console.log('❌ Cancelar clicado');
+                this.closeServiceModal();
+            };
+        }
+        
+        if (saveServiceBtn) {
+            saveServiceBtn.onclick = () => {
+                console.log('💾 Salvar serviço clicado');
+                this.saveService();
+            };
+        }
+        
+        // Fechar modal ao clicar fora
+        const modal = document.getElementById('serviceModal');
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    this.closeServiceModal();
+                }
+            };
+        }
+        
+        console.log('✅ Event listeners de serviços configurados');
+    }
+
+    static async loadServicesFromAPI() {
+        console.log('📥 loadServicesFromAPI() INICIADO');
+        
+        const container = document.getElementById('servicesContainer');
+        
+        if (!container) {
+            console.error('❌ servicesContainer NÃO encontrado');
             return;
         }
 
-        const speciality = input.value.trim();
-        console.log('📝 Valor:', speciality);
-        
-        if (!speciality) {
-            alert('⚠️ Digite uma especialidade');
-            input.focus();
-            return;
-        }
-
-        // Desabilita
-        if (saveBtn) {
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '⏳ Salvando...';
-        }
-        if (input) input.disabled = true;
+        container.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 30px;">⏳</div>
+                <p style="color: #9ca3af; margin-top: 8px;">Carregando serviços...</p>
+            </div>`;
 
         try {
-            console.log('🌐 Enviando para API...');
-            const response = await ApiService.saveSpeciality(speciality);
+            const response = await ApiService.getServices();
+            
+            console.log('📦 SERVICES RESPONSE:', response);
+            
+            if (response && response.success && response.data && Array.isArray(response.data)) {
+                if (response.data.length > 0) {
+                    console.log(`✅ ${response.data.length} serviços encontrados`);
+                    this.renderServices(response.data);
+                } else {
+                    console.log('📭 Nenhum serviço encontrado');
+                    this.renderEmptyServices();
+                }
+            } else {
+                console.warn('⚠️ Resposta inválida');
+                this.renderEmptyServices();
+            }
+            
+        } catch (error) {
+            console.error('❌ ERRO ao carregar serviços:', error);
+            this.renderServicesError(error.message);
+        }
+    }
+
+    static renderServices(services) {
+        console.log('🎨 renderServices() com', services.length, 'serviços');
+        
+        const container = document.getElementById('servicesContainer');
+        if (!container) return;
+
+        container.innerHTML = services.map(service => `
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #f59e0b; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 16px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <h5 style="color: #1f2937; font-size: 18px; font-weight: 700; margin-bottom: 8px;">
+                            ${service.name}
+                        </h5>
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
+                            ${service.description}
+                        </p>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 16px;">⏱️</span>
+                                <span style="color: #374151; font-size: 14px; font-weight: 600;">
+                                    ${service.defaultDurationInMinutes} min
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 16px;">💰</span>
+                                <span style="color: #16a34a; font-size: 16px; font-weight: 700;">
+                                    R$ ${service.defaultPrice.toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button 
+                            onclick="AppController.editService('${service.id}')"
+                            style="background: #e0e7ff; color: #667eea; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;"
+                        >
+                            ✏️ Editar
+                        </button>
+                        <button 
+                            onclick="AppController.deleteService('${service.id}', '${service.name.replace(/'/g, "\\'")}')"
+                            style="background: #fee2e2; color: #dc2626; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;"
+                        >
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        console.log('✅ Serviços renderizados');
+    }
+
+    static renderEmptyServices() {
+        const container = document.getElementById('servicesContainer');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; background: white; border-radius: 8px; border: 2px dashed #e5e7eb;">
+                <div style="font-size: 48px; margin-bottom: 10px;">📦</div>
+                <p style="color: #6b7280; font-weight: 600; font-size: 16px;">Nenhum serviço cadastrado</p>
+                <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">Clique em "Novo Serviço" para começar</p>
+            </div>`;
+    }
+
+    static renderServicesError(message) {
+        const container = document.getElementById('servicesContainer');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 8px;">
+                <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                <p style="color: #dc2626; font-weight: 600;">Erro ao carregar serviços</p>
+                <p style="color: #7f1d1d; font-size: 14px; margin-top: 8px;">${message}</p>
+                <button onclick="AppController.loadServicesFromAPI()" style="margin-top: 12px; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    🔄 Tentar Novamente
+                </button>
+            </div>`;
+    }
+
+    static openServiceModal(service = null) {
+        console.log('📝 openServiceModal()', service ? 'EDITAR' : 'NOVO');
+        
+        const modal = document.getElementById('serviceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const nameInput = document.getElementById('serviceName');
+        const descInput = document.getElementById('serviceDescription');
+        const durationInput = document.getElementById('serviceDuration');
+        const priceInput = document.getElementById('servicePrice');
+        
+        if (service) {
+            // Modo edição
+            this.currentEditingServiceId = service.id;
+            modalTitle.textContent = 'Editar Serviço';
+            nameInput.value = service.name;
+            descInput.value = service.description;
+            durationInput.value = service.defaultDurationInMinutes;
+            priceInput.value = service.defaultPrice;
+        } else {
+            // Modo criação
+            this.currentEditingServiceId = null;
+            modalTitle.textContent = 'Novo Serviço';
+            nameInput.value = '';
+            descInput.value = '';
+            durationInput.value = '';
+            priceInput.value = '';
+        }
+        
+        modal.style.display = 'flex';
+    }
+
+    static closeServiceModal() {
+        console.log('❌ closeServiceModal()');
+        
+        const modal = document.getElementById('serviceModal');
+        modal.style.display = 'none';
+        this.currentEditingServiceId = null;
+    }
+
+    static async saveService() {
+        console.log('💾 saveService() INICIADO');
+        
+        const nameInput = document.getElementById('serviceName');
+        const descInput = document.getElementById('serviceDescription');
+        const durationInput = document.getElementById('serviceDuration');
+        const priceInput = document.getElementById('servicePrice');
+        const saveBtn = document.getElementById('saveServiceBtn');
+        
+        const name = nameInput.value.trim();
+        const description = descInput.value.trim();
+        const duration = parseInt(durationInput.value);
+        const price = parseFloat(priceInput.value);
+        
+        // Validações
+        if (!name) {
+            alert('⚠️ Digite o nome do serviço');
+            nameInput.focus();
+            return;
+        }
+        
+        if (!description) {
+            alert('⚠️ Digite a descrição do serviço');
+            descInput.focus();
+            return;
+        }
+        
+        if (!duration || duration <= 0) {
+            alert('⚠️ Digite uma duração válida');
+            durationInput.focus();
+            return;
+        }
+        
+        if (!price || price < 0) {
+            alert('⚠️ Digite um preço válido');
+            priceInput.focus();
+            return;
+        }
+        
+        const serviceData = {
+            name,
+            description,
+            defaultDurationInMinutes: duration,
+            defaultPrice: price
+        };
+        
+        console.log('📤 Dados do serviço:', serviceData);
+        
+        // Desabilita botão
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '⏳ Salvando...';
+        
+        try {
+            let response;
+            
+            if (this.currentEditingServiceId) {
+                // Atualizar serviço existente
+                console.log('🔄 Atualizando serviço:', this.currentEditingServiceId);
+                response = await ApiService.updateService(this.currentEditingServiceId, serviceData);
+            } else {
+                // Criar novo serviço
+                console.log('🆕 Criando novo serviço');
+                response = await ApiService.createService(serviceData);
+            }
             
             console.log('📦 RESPONSE:', response);
             
             if (response && response.success) {
-                console.log('✅ Salvo com sucesso!');
+                console.log('✅ Serviço salvo com sucesso!');
                 
                 // Feedback
-                if (saveBtn) {
-                    saveBtn.innerHTML = '✅ Salvo!';
-                    saveBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
-                }
+                saveBtn.innerHTML = '✅ Salvo!';
+                saveBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
                 
-                // Recarrega
+                // Fecha modal e recarrega lista
                 setTimeout(async () => {
-                    await this.loadSpecialityFromAPI();
-                    input.value = '';
+                    this.closeServiceModal();
+                    await this.loadServicesFromAPI();
                     
-                    if (saveBtn) {
-                        saveBtn.innerHTML = '💾 Salvar';
-                        saveBtn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
-                        saveBtn.disabled = false;
-                    }
-                }, 1500);
+                    saveBtn.innerHTML = '💾 Salvar Serviço';
+                    saveBtn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                    saveBtn.disabled = false;
+                }, 1000);
             } else {
                 throw new Error('Resposta inválida da API');
             }
             
         } catch (error) {
-            console.error('❌ ERRO ao salvar:', error);
-            alert(`❌ Erro: ${error.message}`);
+            console.error('❌ ERRO ao salvar serviço:', error);
+            alert(`❌ Erro ao salvar: ${error.message}`);
             
-            if (saveBtn) {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '💾 Salvar';
+            saveBtn.innerHTML = '💾 Salvar Serviço';
+            saveBtn.disabled = false;
+        }
+    }
+
+    static async editService(serviceId) {
+        console.log('✏️ editService():', serviceId);
+        
+        try {
+            // Busca os serviços novamente para pegar os dados atualizados
+            const response = await ApiService.getServices();
+            
+            if (response && response.success && response.data) {
+                const service = response.data.find(s => s.id === serviceId);
+                
+                if (service) {
+                    this.openServiceModal(service);
+                } else {
+                    alert('❌ Serviço não encontrado');
+                }
             }
-            if (input) input.disabled = false;
+        } catch (error) {
+            console.error('❌ ERRO ao buscar serviço:', error);
+            alert('❌ Erro ao carregar dados do serviço');
+        }
+    }
+
+    static async deleteService(serviceId, serviceName) {
+        console.log('🗑️ deleteService():', serviceId, serviceName);
+        
+        if (!confirm(`🗑️ Deseja realmente excluir o serviço "${serviceName}"?`)) {
+            return;
+        }
+        
+        try {
+            console.log('🌐 Deletando serviço...');
+            const response = await ApiService.deleteService(serviceId);
+            
+            console.log('📦 RESPONSE:', response);
+            
+            if (response && response.success) {
+                console.log('✅ Serviço excluído com sucesso!');
+                await this.loadServicesFromAPI();
+            } else {
+                throw new Error('Erro ao excluir serviço');
+            }
+            
+        } catch (error) {
+            console.error('❌ ERRO ao excluir:', error);
+            alert(`❌ Erro ao excluir: ${error.message}`);
         }
     }
 }
 
-// Expõe globalment
+
+// Expõe globalmente
 window.AppController = AppController;
 
 document.addEventListener('DOMContentLoaded', () => {

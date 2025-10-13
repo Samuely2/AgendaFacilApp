@@ -154,24 +154,52 @@ export class ApiService {
         });
     }
 
-    // ====== OUTROS MÉTODOS (caso você tenha) ======
+    // ====== MÉTODOS DE SERVIÇOS ======
 
-    static async getAppointments() {
-        return this.request('/appointments', {
-            method: 'GET'
-        });
-    }
-
-    static async createAppointment(appointmentData) {
-        return this.request('/appointments', {
-            method: 'POST',
-            body: appointmentData
-        });
-    }
-
+    /**
+     * GET /api/service/services
+     * Busca todos os serviços
+     */
     static async getServices() {
-        return this.request('/services', {
+        return this.request('/service/services', {
             method: 'GET'
+        });
+    }
+
+    /**
+     * POST /api/service/create-service
+     * Cria um novo serviço
+     * @param {Object} serviceData - Dados do serviço
+     * @param {string} serviceData.name - Nome do serviço
+     * @param {string} serviceData.description - Descrição
+     * @param {number} serviceData.defaultDurationInMinutes - Duração em minutos
+     * @param {number} serviceData.defaultPrice - Preço padrão
+     */
+    static async createService(serviceData) {
+        return this.request('/service/create-service', {
+            method: 'POST',
+            body: serviceData
+        });
+    }
+
+    /**
+     * PUT /api/service/update-service/{id}
+     * Atualiza um serviço existente
+     */
+    static async updateService(id, serviceData) {
+        return this.request(`/service/update-service/${id}`, {
+            method: 'PUT',
+            body: serviceData
+        });
+    }
+
+    /**
+     * DELETE /api/service/services?serviceId={id}
+     * Deleta um serviço
+     */
+    static async deleteService(serviceId) {
+        return this.request(`/service/services?serviceId=${serviceId}`, {
+            method: 'DELETE'
         });
     }
 }
