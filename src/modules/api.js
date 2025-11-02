@@ -183,11 +183,17 @@ export class ApiService {
     }
 
     /**
-     * PUT /api/service/update-service/{id}
+     * PUT /api/service/{id}
      * Atualiza um serviço existente
+     * @param {string} id - ID do serviço a ser atualizado
+     * @param {Object} serviceData - Dados do serviço
+     * @param {string} serviceData.name - Nome do serviço
+     * @param {string} serviceData.description - Descrição do serviço
+     * @param {number} serviceData.defaultDurationInMinutes - Duração em minutos
+     * @param {number} serviceData.defaultPrice - Preço padrão
      */
     static async updateService(id, serviceData) {
-        return this.request(`/service/update-service/${id}`, {
+        return this.request(`/service/${id}`, {
             method: 'PUT',
             body: serviceData
         });

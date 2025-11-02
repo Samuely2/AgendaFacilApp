@@ -742,7 +742,13 @@ class AppController {
             if (this.currentEditingServiceId) {
                 // Atualizar serviço existente
                 console.log('🔄 Atualizando serviço:', this.currentEditingServiceId);
-                response = await ApiService.updateService(this.currentEditingServiceId, serviceData);
+                try {
+                    response = await ApiService.updateService(this.currentEditingServiceId, serviceData);
+                    console.log('✅ Serviço atualizado com sucesso:', response);
+                } catch (updateError) {
+                    console.error('❌ Erro ao atualizar serviço:', updateError);
+                    throw updateError;
+                }
             } else {
                 // Criar novo serviço
                 console.log('🆕 Criando novo serviço');
