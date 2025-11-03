@@ -962,7 +962,7 @@ class AppController {
                 response.data.forEach(provider => {
                     const option = document.createElement('option');
                     option.value = provider.id;
-                    option.textContent = provider.speciality || provider.fullname || provider.username || 'Prestador';
+                    option.textContent = provider.fullname || provider.speciality || provider.username || 'Prestador';
                     select.appendChild(option);
                 });
             }
@@ -1159,10 +1159,15 @@ class AppController {
         };
 
         container.innerHTML = appointmentsWithDetails.map(app => {
-            const personLabel = userType === 'client' ? 'Prestador' : 'Cliente';
-            const personName = userType === 'client' ? 
-                (app.provider?.speciality || app.provider?.fullname || app.provider?.username || 'N/A') :
-                (app.user?.fullname || app.user?.username || 'Cliente N/A'); // Assumindo que a API retorne `app.user` para o provider
+            let personLabel, personName;
+            if (userType === 'client') {
+                personLabel = 'Prestador';
+                // Sempre prioriza o fullname do prestador
+                personName = app.provider?.fullname || app.provider?.username || app.provider?.name || 'N/A';
+            } else {
+                personLabel = 'Cliente';
+                personName = app.user?.fullname || app.user?.username || app.user?.name || 'Cliente N/A';
+            }
 
             return `
             <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid ${statusColors[app.status]}; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">

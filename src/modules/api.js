@@ -138,7 +138,7 @@ export class ApiService {
      */
     static async saveSpeciality(speciality) {
         return this.request('/serviceProvider/specialities', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -206,7 +206,7 @@ export class ApiService {
      * Deleta um serviço
      */
     static async deleteService(serviceId) {
-        return this.request(`/service/services?serviceId=${serviceId}`, {
+        return this.request(`/service/${serviceId}`, {
             method: 'DELETE'
         });
     }
