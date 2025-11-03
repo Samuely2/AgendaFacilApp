@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda Fácil - Autenticação</title>
+    <!-- Use o caminho correto para seu CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -84,12 +85,36 @@
         </nav>
         <main class="main-content">
             <div class="dashboard-card">
+                
+                <!-- 
+                  O dashboardContent é onde o JS injeta o conteúdo dinâmico 
+                  (botões, formulário de especialidade, etc.)
+                -->
                 <div id="dashboardContent">
-                    </div>
+                    <!-- O conteúdo (especialidade, serviços, etc.) será injetado aqui pelo app.js -->
+                </div>
+
+                <!-- 
+                  Os containers da LISTA de agendamentos ficam DEPOIS (como irmãos) 
+                  do dashboardContent, para não serem apagados.
+                  
+                  O app.js irá preencher e MOSTRAR o container correto.
+                  Removi o style="display: none..." para evitar quebras de layout.
+                -->
+                <div id="appointmentsContainer">
+                    <!-- A lista de agendamentos do CLIENTE será carregada aqui -->
+                </div>
+                
+                <div id="providerAppointmentsContainer">
+                    <!-- A lista de agendamentos do PRESTADOR será carregada aqui -->
+                </div>
+
             </div>
         </main>
     </div>
 
+    <!-- Use o caminho correto para seu JS -->
     <script type="module" src="src/app.js"></script>
 </body>
 </html>
+

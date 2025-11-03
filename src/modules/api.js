@@ -129,15 +129,7 @@ export class ApiService {
 
     // ====== MÉTODOS DE ESPECIALIDADES ======
 
-    /**
-     * GET /api/serviceProvider/specialities
-     * Busca a especialidade do prestador logado
-     */
-    static async getSpeciality() {
-        return this.request('/serviceProvider/specialities', {
-            method: 'GET'
-        });
-    }
+    // (Removido: getSpeciality antigo)
 
     /**
      * POST /api/serviceProvider/specialities
@@ -156,12 +148,33 @@ export class ApiService {
 
     // ====== MÉTODOS DE SERVIÇOS ======
 
+    // (Removido: getServices antigo)
     /**
-     * GET /api/service/services
-     * Busca todos os serviços
+     * GET /api/service/all
+     * Busca todos os serviços disponíveis (para agendamento)
      */
     static async getServices() {
-        return this.request('/service/services', {
+        return this.request('/service/all', {
+            method: 'GET'
+        });
+    }
+
+    /**
+     * GET /api/serviceProvider/all
+     * Busca todos os prestadores de serviço (inclui especialidade)
+     */
+    static async getSpeciality() {
+        return this.request('/serviceProvider/all', {
+            method: 'GET'
+        });
+    }
+
+    /**
+     * GET /api/service/{id}
+     * Busca um serviço específico por ID
+     */
+    static async getServiceById(serviceId) {
+        return this.request(`/service/${serviceId}`, {
             method: 'GET'
         });
     }
@@ -169,11 +182,6 @@ export class ApiService {
     /**
      * POST /api/service/create-service
      * Cria um novo serviço
-     * @param {Object} serviceData - Dados do serviço
-     * @param {string} serviceData.name - Nome do serviço
-     * @param {string} serviceData.description - Descrição
-     * @param {number} serviceData.defaultDurationInMinutes - Duração em minutos
-     * @param {number} serviceData.defaultPrice - Preço padrão
      */
     static async createService(serviceData) {
         return this.request('/service/create-service', {
@@ -185,12 +193,6 @@ export class ApiService {
     /**
      * PUT /api/service/{id}
      * Atualiza um serviço existente
-     * @param {string} id - ID do serviço a ser atualizado
-     * @param {Object} serviceData - Dados do serviço
-     * @param {string} serviceData.name - Nome do serviço
-     * @param {string} serviceData.description - Descrição do serviço
-     * @param {number} serviceData.defaultDurationInMinutes - Duração em minutos
-     * @param {number} serviceData.defaultPrice - Preço padrão
      */
     static async updateService(id, serviceData) {
         return this.request(`/service/${id}`, {
@@ -206,6 +208,75 @@ export class ApiService {
     static async deleteService(serviceId) {
         return this.request(`/service/services?serviceId=${serviceId}`, {
             method: 'DELETE'
+        });
+    }
+
+    // ====== MÉTODOS DE PROVIDERS ======
+
+    /**
+     * GET /api/serviceProvider/all
+     * Busca todos os prestadores de serviço
+     */
+    static async getAllProviders() {
+        return this.request('/serviceProvider/all', {
+            method: 'GET'
+        });
+    }
+
+    /**
+     * GET /api/serviceProvider/{id}
+     * Busca um prestador específico por ID
+     */
+    static async getProviderById(providerId) {
+        return this.request(`/serviceProvider/${providerId}`, {
+            method: 'GET'
+        });
+    }
+
+    // ====== MÉTODOS DE AGENDAMENTOS ======
+
+    /**
+     * GET /api/appointment/all
+     * Busca todos os agendamentos do usuário logado
+     */
+    static async getAllAppointments() {
+        return this.request('/appointment/all', {
+            method: 'GET'
+        });
+    }
+
+    /**
+     * POST /api/appointment/create-appointment
+     * Cria um novo agendamento
+     * @param {Object} appointmentData
+     *   - serviceId
+     *   - serviceProviderId
+     *   - startDateTime
+     *   - endDateTime
+     *   - price
+     *   - durationInMinutes
+     */
+    static async createAppointment(appointmentData) {
+        const {
+            serviceId,
+            serviceProviderId,
+            startDateTime,
+            endDateTime,
+            price,
+            durationInMinutes
+        } = appointmentData;
+
+        const queryParams = new URLSearchParams({
+            ServiceId: serviceId,
+            ServiceProviderId: serviceProviderId,
+            StartDateTime: startDateTime,
+            EndDateTime: endDateTime,
+            Price: price,
+            DurationInMinutes: durationInMinutes
+        });
+
+        return this.request(`/appointment/create-appointment?${queryParams}`, {
+            method: 'POST'
         });
     }
 }

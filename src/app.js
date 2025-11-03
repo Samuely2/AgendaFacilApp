@@ -67,7 +67,7 @@ class AppController {
                     username: userInfo['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || email,
                     userId: userInfo['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
                     role: response.roles && response.roles.length > 0 ? response.roles[0] : 
-                          userInfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'Client',
+                            userInfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'Client',
                     roles: response.roles || [],
                     expiration: response.expiration,
                     jti: userInfo.jti
@@ -147,7 +147,12 @@ class AppController {
             console.error('❌ dashboardContent não encontrado!');
             return;
         }
-        
+        // Esconde ambos os containers antes de mostrar o correto
+        const clientContainer = document.getElementById('appointmentsContainer');
+        const providerContainer = document.getElementById('providerAppointmentsContainer');
+        if (clientContainer) clientContainer.style.display = 'none'; // Hide client container
+        if (providerContainer) providerContainer.style.display = 'none'; // Hide provider container
+
         const baseTitleStyle = "color: #1f2937; font-size: 28px; margin-bottom: 16px;";
         const baseParagraphStyle = "color: #6b7280; font-size: 18px; margin-bottom: 30px;";
 
@@ -160,157 +165,133 @@ class AppController {
                     <li>Visualizar relatórios detalhados</li>
                     <li>Configurar serviços e categorias</li>
                 </ul>`;
-        } 
-        else if (role === 'ServiceProvider') {
+        } else if (role === 'ServiceProvider') {
+            // Mostra apenas o container do provider
+            if (providerContainer) providerContainer.style.display = '';
             content.innerHTML = `
                 <h3 style="${baseTitleStyle}">Painel do Prestador</h3>
                 <p style="${baseParagraphStyle}">Acompanhe sua agenda, gerencie horários e serviços disponíveis.</p>
-                
-                <!-- Seção de Especialidade -->
                 <div style="background: linear-gradient(135deg, #f8fafc, #e0e7ff); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #667eea;">
-                    <h4 style="color: #1f2937; font-size: 20px; margin-bottom: 16px;">
-                        ✨ Minha Especialidade
-                    </h4>
-                    
+                    <h4 style="color: #1f2937; font-size: 20px; margin-bottom: 16px;">✨ Minha Especialidade</h4>
                     <div id="specialityContainer"></div>
-                    
                     <div id="specialityFormContainer" style="margin-top: 16px;">
                         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <input 
-                                type="text" 
-                                id="specialityInput" 
-                                placeholder="Ex: Cabeleireiro, Massagista, Personal Trainer..."
-                                style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
-                            />
-                            <button 
-                                id="saveSpecialityBtn"
-                                type="button"
-                                style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;"
-                            >
-                                💾 Salvar
-                            </button>
+                            <input type="text" id="specialityInput" placeholder="Ex: Cabeleireiro, Massagista, Personal Trainer..." style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
+                            <button id="saveSpecialityBtn" type="button" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">💾 Salvar</button>
                         </div>
-                        <p style="color: #6b7280; font-size: 14px; margin-top: 8px;">
-                            💡 Dica: Defina sua especialidade principal para aparecer nas buscas.
-                        </p>
+                        <p style="color: #6b7280; font-size: 14px; margin-top: 8px;">💡 Dica: Defina sua especialidade principal para aparecer nas buscas.</p>
                     </div>
                 </div>
-
-                <!-- Seção de Serviços -->
                 <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #f59e0b;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                        <h4 style="color: #1f2937; font-size: 20px; margin: 0;">
-                            🛠️ Meus Serviços
-                        </h4>
-                        <button 
-                            id="newServiceBtn"
-                            type="button"
-                            style="padding: 10px 20px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
-                        >
-                            ➕ Novo Serviço
-                        </button>
+                        <h4 style="color: #1f2937; font-size: 20px; margin: 0;">🛠️ Meus Serviços</h4>
+                        <button id="newServiceBtn" type="button" style="padding: 10px 20px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">➕ Novo Serviço</button>
                     </div>
-                    
                     <div id="servicesContainer"></div>
                 </div>
-
-                <!-- Modal de Criar/Editar Serviço -->
                 <div id="serviceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
                     <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
                         <h3 style="color: #1f2937; font-size: 24px; margin-bottom: 24px;" id="modalTitle">Novo Serviço</h3>
-                        
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Nome do Serviço *</label>
-                            <input 
-                                type="text" 
-                                id="serviceName"
-                                placeholder="Ex: Corte de cabelo"
-                                style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
-                            />
+                            <input type="text" id="serviceName" placeholder="Ex: Corte de cabelo" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
                         </div>
-
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Descrição *</label>
-                            <textarea 
-                                id="serviceDescription"
-                                placeholder="Descreva o serviço..."
-                                rows="3"
-                                style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical;"
-                            ></textarea>
+                            <textarea id="serviceDescription" placeholder="Descreva o serviço..." rows="3" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical;"></textarea>
                         </div>
-
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                             <div>
                                 <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Duração (min) *</label>
-                                <input 
-                                    type="number" 
-                                    id="serviceDuration"
-                                    placeholder="30"
-                                    min="1"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
-                                />
+                                <input type="number" id="serviceDuration" placeholder="30" min="1" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
                             </div>
                             <div>
                                 <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Preço (R$) *</label>
-                                <input 
-                                    type="number" 
-                                    id="servicePrice"
-                                    placeholder="50.00"
-                                    min="0"
-                                    step="0.01"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
-                                />
+                                <input type="number" id="servicePrice" placeholder="50.00" min="0" step="0.01" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
                             </div>
                         </div>
-
                         <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                            <button 
-                                id="cancelServiceBtn"
-                                type="button"
-                                style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                id="saveServiceBtn"
-                                type="button"
-                                style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
-                            >
-                                💾 Salvar Serviço
-                            </button>
+                            <button id="cancelServiceBtn" type="button" style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+                            <button id="saveServiceBtn" type="button" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">💾 Salvar Serviço</button>
                         </div>
                     </div>
                 </div>
-                
                 <ul class="features-list">
                     <li>Visualizar minha agenda diária/semanal</li>
                     <li>Configurar meus horários de atendimento</li>
                     <li>Gerenciar os serviços que ofereço</li>
                 </ul>`;
-            
             setTimeout(() => {
-                console.log('🎬 Iniciando setup de especialidade e serviços...');
                 this.setupSpecialityEvents();
                 this.loadSpecialityFromAPI();
                 this.setupServicesEvents();
                 this.loadServicesFromAPI();
+                this.loadProviderAppointments();
             }, 100);
-        }
-        else if (role === 'Client') {
+        } else if (role === 'Client') {
+            // Mostra apenas o container do cliente
+            if (clientContainer) clientContainer.style.display = '';
             content.innerHTML = `
                 <h3 style="${baseTitleStyle}">Minha Conta</h3>
                 <p style="${baseParagraphStyle}">Agende novos serviços e gerencie seus compromissos existentes.</p>
+                <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #3b82f6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <h4 style="color: #1f2937; font-size: 20px; margin: 0;">📅 Novo Agendamento</h4>
+                        <button id="newAppointmentBtn" type="button" style="padding: 10px 20px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">➕ Agendar Serviço</button>
+                    </div>
+                    </div>
+                </div>
+                <div id="appointmentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 16px; padding: 32px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                        <h3 style="color: #1f2937; font-size: 24px; margin-bottom: 24px;">Novo Agendamento</h3>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Serviço *</label>
+                            <select id="appointmentService" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"><option value="">Carregando serviços...</option></select>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Prestador *</label>
+                            <select id="appointmentProvider" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"><option value="">Carregando prestadores...</option></select>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Data Início *</label>
+                                <input type="datetime-local" id="appointmentStartDate" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
+                            </div>
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Data Fim *</label>
+                                <input type="datetime-local" id="appointmentEndDate" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Duração (min) *</label>
+                                <input type="number" id="appointmentDuration" placeholder="60" min="1" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
+                            </div>
+                            <div>
+                                <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 8px;">Preço (R$) *</label>
+                                <input type="number" id="appointmentPrice" placeholder="100.00" min="0" step="0.01" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" />
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button id="cancelAppointmentBtn" type="button" style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+                            <button id="saveAppointmentBtn" type="button" style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">💾 Confirmar Agendamento</button>
+                        </div>
+                    </div>
+                </div>
                 <ul class="features-list">
-                    <li>Agendar um novo serviço</li>
-                    <li>Visualizar meus próximos agendamentos</li>
-                    <li>Cancelar ou reagendar um horário</li>
+                    <li>Buscar serviços disponíveis</li>
+                    <li>Escolher prestador de confiança</li>
+                    <li>Agendar com data e horário</li>
+                    <li>Acompanhar status dos agendamentos</li>
                 </ul>`;
-        }
-        else {
+            setTimeout(() => {
+                this.setupAppointmentsEvents();
+                this.loadClientAppointments();
+            }, 100);
+        } else {
             content.innerHTML = `<p>Dashboard não configurado para este tipo de usuário.</p>`;
         }
     }
-
     // ==========================================
     // ESPECIALIDADE - MÉTODOS
     // ==========================================
@@ -372,7 +353,12 @@ class AppController {
             console.log('📏 data.length:', response?.data?.length);
             
             if (response && response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
-                const speciality = response.data[0];
+                let speciality = response.data[0];
+                // Se vier objeto, tenta pegar o campo string
+                if (speciality && typeof speciality === 'object') {
+                    // Tenta pegar os campos mais comuns
+                    speciality = speciality.speciality || speciality.name || speciality.nome || JSON.stringify(speciality);
+                }
                 console.log('🎯 ESPECIALIDADE ENCONTRADA:', speciality);
                 this.showSpecialityCard(speciality);
             } else {
@@ -385,6 +371,47 @@ class AppController {
             this.showErrorState(error.message);
         }
     }
+
+    // *** INÍCIO DA CORREÇÃO (FUNÇÃO ADICIONADA) ***
+    static async saveSpecialityToAPI() {
+        console.log('💾 saveSpecialityToAPI()');
+        
+        const input = document.getElementById('specialityInput');
+        const saveBtn = document.getElementById('saveSpecialityBtn');
+        const speciality = input.value.trim();
+
+        if (!speciality) {
+            alert('Por favor, insira uma especialidade.');
+            return;
+        }
+
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '⏳ Salvando...';
+        saveBtn.disabled = true;
+
+        try {
+            // A API espera a string pura, mas o body deve ser JSON
+            await ApiService.saveSpeciality(speciality);
+            
+            console.log('✅ Especialidade salva com sucesso!');
+            saveBtn.innerHTML = '✅ Salvo!';
+            saveBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+
+            setTimeout(() => {
+                this.loadSpecialityFromAPI(); // Recarrega para mostrar o card
+                saveBtn.innerHTML = originalBtnText;
+                saveBtn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                saveBtn.disabled = false;
+            }, 1500);
+
+        } catch (error) {
+            console.error('❌ Erro ao salvar especialidade:', error);
+            alert(`Erro ao salvar: ${error.message}`);
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+        }
+    }
+    // *** FIM DA CORREÇÃO ***
 
     static showSpecialityCard(speciality) {
         console.log('🎨 showSpecialityCard() com:', speciality);
@@ -832,6 +859,344 @@ class AppController {
             console.error('❌ ERRO ao excluir:', error);
             alert(`❌ Erro ao excluir: ${error.message}`);
         }
+    }
+
+    // ==========================================
+    // AGENDAMENTOS - MÉTODOS (CLIENTE)
+    // ==========================================
+
+    static setupAppointmentsEvents() {
+        console.log('⚙️ setupAppointmentsEvents()');
+        
+        const newBtn = document.getElementById('newAppointmentBtn');
+        const cancelBtn = document.getElementById('cancelAppointmentBtn');
+        const saveBtn = document.getElementById('saveAppointmentBtn');
+        const modal = document.getElementById('appointmentModal');
+        
+        if (newBtn) {
+            newBtn.onclick = () => this.openAppointmentModal();
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.onclick = () => this.closeAppointmentModal();
+        }
+        
+        if (saveBtn) {
+            saveBtn.onclick = () => this.saveAppointment();
+        }
+        
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    this.closeAppointmentModal();
+                }
+            };
+        }
+        
+        // Auto-preenchimento
+        const serviceSelect = document.getElementById('appointmentService');
+        if (serviceSelect) {
+            serviceSelect.onchange = (e) => this.onServiceSelect(e.target);
+        }
+    }
+
+    static async openAppointmentModal() {
+        console.log('📝 openAppointmentModal()');
+        
+        const modal = document.getElementById('appointmentModal');
+        if (!modal) return;
+        
+        // Reseta o formulário
+        document.getElementById('appointmentService').innerHTML = '<option value="">Carregando...</option>';
+        document.getElementById('appointmentProvider').innerHTML = '<option value="">Carregando...</option>';
+        document.getElementById('appointmentStartDate').value = '';
+        document.getElementById('appointmentEndDate').value = '';
+        document.getElementById('appointmentDuration').value = '';
+        document.getElementById('appointmentPrice').value = '';
+        
+        modal.style.display = 'flex';
+        
+        // Carrega os dropdowns
+        await this.loadServicesForModal();
+        await this.loadProvidersForModal();
+    }
+
+    static closeAppointmentModal() {
+        console.log('❌ closeAppointmentModal()');
+        const modal = document.getElementById('appointmentModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    static async loadServicesForModal() {
+        console.log('Dropdown: Carregando serviços...');
+        const select = document.getElementById('appointmentService');
+        try {
+            const response = await ApiService.getServices();
+            if (response && response.success && response.data) {
+                select.innerHTML = '<option value="">Selecione um serviço</option>';
+                response.data.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service.id;
+                    option.textContent = service.name;
+                    // Guarda os dados no dataset para auto-preenchimento
+                    option.dataset.price = service.defaultPrice;
+                    option.dataset.duration = service.defaultDurationInMinutes;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar serviços no modal:', error);
+            select.innerHTML = '<option value="">Erro ao carregar</option>';
+        }
+    }
+
+    static async loadProvidersForModal() {
+        console.log('Dropdown: Carregando prestadores...');
+        const select = document.getElementById('appointmentProvider');
+        try {
+            const response = await ApiService.getAllProviders();
+            if (response && response.success && response.data) {
+                select.innerHTML = '<option value="">Selecione um prestador</option>';
+                response.data.forEach(provider => {
+                    const option = document.createElement('option');
+                    option.value = provider.id;
+                    option.textContent = provider.speciality || provider.fullname || provider.username || 'Prestador';
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar prestadores no modal:', error);
+            select.innerHTML = '<option value="">Erro ao carregar</option>';
+        }
+    }
+
+    static onServiceSelect(selectElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            const price = selectedOption.dataset.price;
+            const duration = selectedOption.dataset.duration;
+            
+            console.log(`Serviço selecionado: Preço ${price}, Duração ${duration}`);
+            
+            document.getElementById('appointmentPrice').value = parseFloat(price).toFixed(2);
+            document.getElementById('appointmentDuration').value = duration;
+        } else {
+            document.getElementById('appointmentPrice').value = '';
+            document.getElementById('appointmentDuration').value = '';
+        }
+    }
+
+    static async saveAppointment() {
+        console.log('💾 saveAppointment()');
+        
+        // Coleta de dados
+        const serviceId = document.getElementById('appointmentService').value;
+        const serviceProviderId = document.getElementById('appointmentProvider').value;
+        const startDateTime = document.getElementById('appointmentStartDate').value;
+        const endDateTime = document.getElementById('appointmentEndDate').value;
+        const price = parseFloat(document.getElementById('appointmentPrice').value);
+        const durationInMinutes = parseInt(document.getElementById('appointmentDuration').value);
+        
+        // Validação
+        if (!serviceId) {
+            alert('Selecione um serviço');
+            return;
+        }
+        if (!serviceProviderId) {
+            alert('Selecione um prestador');
+            return;
+        }
+        if (!startDateTime || !endDateTime) {
+            alert('Selecione as datas de início e fim');
+            return;
+        }
+        if (new Date(startDateTime) >= new Date(endDateTime)) {
+            alert('Data de início deve ser anterior à data de fim');
+            return;
+        }
+        
+        const appointmentData = {
+            serviceId,
+            serviceProviderId,
+            startDateTime,
+            endDateTime,
+            price,
+            durationInMinutes
+        };
+        
+        console.log('📤 Enviando agendamento:', appointmentData);
+        
+        const saveBtn = document.getElementById('saveAppointmentBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '⏳ Agendando...';
+        
+        try {
+            const response = await ApiService.createAppointment(appointmentData);
+            
+            if (response && response.success) {
+                console.log('✅ Agendamento criado!');
+                saveBtn.innerHTML = '✅ Agendado!';
+                saveBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+                
+                setTimeout(() => {
+                    this.closeAppointmentModal();
+                    this.loadClientAppointments(); // Recarrega a lista
+                    
+                    saveBtn.innerHTML = '💾 Confirmar Agendamento';
+                    saveBtn.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                    saveBtn.disabled = false;
+                }, 1500);
+            } else {
+                throw new Error(response.message || 'Erro ao criar agendamento');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao salvar agendamento:', error);
+            alert(`Erro ao agendar: ${error.message}`);
+            saveBtn.innerHTML = '💾 Confirmar Agendamento';
+            saveBtn.disabled = false;
+        }
+    }
+
+
+    // ==========================================
+    // AGENDAMENTOS - MÉTODOS (LISTAGEM)
+    // ==========================================
+
+    static async loadClientAppointments() {
+        const container = document.getElementById('appointmentsContainer');
+        if (!container) return;
+        container.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 30px;">⏳</div>
+                <p style="color: #9ca3af; margin-top: 8px;">Carregando agendamentos...</p>
+            </div>`;
+        try {
+            const response = await ApiService.getAllAppointments();
+            if (response && response.success && response.data && response.data.length > 0) {
+                await this.renderAppointments(response.data, container, 'client');
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; background: white; border-radius: 8px; border: 2px dashed #e5e7eb;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📅</div>
+                        <p style="color: #6b7280; font-weight: 600; font-size: 16px;">Nenhum agendamento encontrado</p>
+                        <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">Clique em "Agendar Serviço" para começar</p>
+                    </div>`;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar agendamentos:', error);
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 8px;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                    <p style="color: #dc2626; font-weight: 600;">Erro ao carregar agendamentos</p>
+                </div>`;
+        }
+    }
+
+    static async loadProviderAppointments() {
+        const container = document.getElementById('providerAppointmentsContainer');
+        if (!container) return;
+        container.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 30px;">⏳</div>
+                <p style="color: #9ca3af; margin-top: 8px;">Carregando agendamentos...</p>
+            </div>`;
+        try {
+            const response = await ApiService.getAllAppointments();
+            if (response && response.success && response.data && response.data.length > 0) {
+                await this.renderAppointments(response.data, container, 'provider');
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; background: white; border-radius: 8px; border: 2px dashed #e5e7eb;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📅</div>
+                        <p style="color: #6b7280; font-weight: 600; font-size: 16px;">Nenhum agendamento encontrado</p>
+                    </div>`;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar agendamentos:', error);
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 8px;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                    <p style="color: #dc2626; font-weight: 600;">Erro ao carregar agendamentos</p>
+                </div>`;
+        }
+    }
+
+    static async renderAppointments(appointments, container, userType) {
+        // Busca detalhes de serviço e provider para cada agendamento
+        const appointmentsWithDetails = await Promise.all(
+            appointments.map(async (appointment) => {
+                try {
+                    const [serviceRes, providerRes] = await Promise.all([
+                        appointment.serviceId ? ApiService.getServiceById(appointment.serviceId) : Promise.resolve({}),
+                        appointment.serviceProviderId ? ApiService.getProviderById(appointment.serviceProviderId) : Promise.resolve({})
+                    ]);
+                    return {
+                        ...appointment,
+                        service: serviceRes?.data,
+                        provider: providerRes?.data
+                    };
+                } catch (error) {
+                    console.error('Erro ao buscar detalhes:', error);
+                    return appointment;
+                }
+            })
+        );
+
+        const statusNames = {
+            0: 'Agendado',
+            1: 'Confirmado',
+            2: 'Cancelado',
+            3: 'Concluído'
+        };
+        const statusColors = {
+            0: '#3b82f6',
+            1: '#22c55e',
+            2: '#ef4444',
+            3: '#6b7280'
+        };
+
+        container.innerHTML = appointmentsWithDetails.map(app => {
+            const personLabel = userType === 'client' ? 'Prestador' : 'Cliente';
+            const personName = userType === 'client' ? 
+                (app.provider?.speciality || app.provider?.fullname || app.provider?.username || 'N/A') :
+                (app.user?.fullname || app.user?.username || 'Cliente N/A'); // Assumindo que a API retorne `app.user` para o provider
+
+            return `
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid ${statusColors[app.status]}; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 16px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <h5 style="color: #1f2937; font-size: 18px; font-weight: 700; margin: 0;">
+                                ${app.service?.name || 'Serviço'}
+                            </h5>
+                            <span style="background: ${statusColors[app.status]}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                ${statusNames[app.status]}
+                            </span>
+                        </div>
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 12px;">
+                            👤 ${personLabel}: ${personName}
+                        </p>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px;">
+                            <div>
+                                📅 <strong>${new Date(app.startDateTime).toLocaleDateString('pt-BR')}</strong>
+                            </div>
+                            <div>
+                                🕐 ${new Date(app.startDateTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                            <div>
+                                ⏱️ ${app.durationInMinutes} min
+                            </div>
+                            <div style="color: #16a34a; font-weight: 700;">
+                                💰 R$ ${app.price?.toFixed(2) ?? ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `}).join('');
     }
 }
 
