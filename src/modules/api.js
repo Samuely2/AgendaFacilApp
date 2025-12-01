@@ -279,4 +279,15 @@ export class ApiService {
             method: 'POST'
         });
     }
+
+static async deleteAppointment(appointmentId) {
+    if (!appointmentId) {
+        throw new Error('ID do agendamento é obrigatório');
+    }
+
+    return this.request(`/appointment/${appointmentId}`, {
+        method: 'DELETE'
+    });
+}
+
 }
